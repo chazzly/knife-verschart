@@ -1,3 +1,4 @@
+## Ver 1.1
 require 'chef/knife'
 require 'chef/search/query'
 
@@ -34,18 +35,33 @@ module Verschart
 	  end
 	end 	
 
+	#Set printf format string.  Add variability later (perhaps above when creating hdrs array.
+	cblen = 10
+
 	# Load list of latest cookbooks
 	charthash['Latest'] = Hash.new
 	server_side_cookbooks = Chef::CookbookVersion.latest_cookbooks
 	server_side_cookbooks.each do |svcb|
-	  mykb_name= svcb[0]
+	  mykb_name = svcb[0]
 	  fm = Chef::CookbookVersion.load(mykb_name, version="_latest")
+	  cblen = mykb_name.length if mykb_name.length > cblen
 	  charthash['Latest'][fm.metadata.name] = fm.metadata.version.to_s
 	  charthash['Latest'][fm.metadata.name] = charthash['Latest'][fm.metadata.name] + " -f" if fm.frozen_version?
 	end
 	
-	#Set printf format string.  Add variability later (perhaps above when creating hdrs array.
-	pstring = "%-35s%-12s%-10s%-10s%-10s%-10s%-10s\n"
+	pstring = "%-#{cblen + 2}s%-12s"
+	hdrs.each do | env |
+	  unless env == 'Latest' 
+	    if env.length > 8 
+	      sz = env.length + 2
+	    else
+	      sz = 10
+	    end
+	    pstring = pstring + "%-#{sz}s"
+	  end
+	end
+	pstring = pstring + "\n"
+
 	printf(pstring,"Cookbook", *hdrs)
 	charthash['Latest'].keys.each do |cb|
 	  cbout = [cb]

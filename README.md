@@ -33,8 +33,7 @@ yum                                3.1.4 -f    <= 3.1.4  <= 3.1.4  <= 3.1.4  <= 
 TO-DO
 =====
 1. List of Environments is currently hardcoded. Can pull from chef server easily, but need a way to estabilish sort order.
-2. Dynamically set column widths.
-3. Need a way to designate which env, if any, should list if that version is frozen or not.
-4. Denote (perhaps with color) that a particular verison does not exist.
-4a. Denote constraints where no cookbook version exists to match the constraint.
-5. Show obsolete constraints (constraints for cookbook that do not exist at all)
+2. Need a way to designate which env, if any, should list if that version is frozen or not.
+3. Denote (perhaps with color) that a particular verison does not exist.
+3a. Denote constraints where no cookbook version exists to match the constraint.
+4. Show obsolete constraints (constraints for cookbook that do not exist at all)
