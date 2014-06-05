@@ -9,11 +9,11 @@ Installation
 Place the Verschart.rb file in your knife plugins directory. 
 
 ex.
-cp Verschart.rb ~/.chef/plugins/knife/Verschart.rb
+`cp Verschart.rb ~/.chef/plugins/knife/Verschart.rb`
 
 USE
 ===
-knife verschart (no argumnets)
+`knife verschart` (no argumnets)
 
 Output will look something like this:
 
