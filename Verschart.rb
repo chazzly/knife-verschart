@@ -3,7 +3,7 @@ require 'chef/search/query'
 
 module Verschart
   class Verschart < Chef::Knife
-    banner 'knife Verschart'
+    banner 'knife verschart'
 
     def run
  
