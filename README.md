@@ -11,7 +11,7 @@ Place the Verschart.rb file in your knife plugins directory.
 ex.
 `cp Verschart.rb ~/.chef/plugins/knife/Verschart.rb`
 
-A 'primary' environment can be set. This environment will highlight in red any versions which are NOT frozen.  
+One or more 'primary' environments can be set. These environments will highlight in red any versions which are NOT frozen.  
 
 USE
 ===
@@ -22,7 +22,7 @@ Output will look something like this:
 Showing Versions for cs1chl001.classifiedventures.com
 
 Version numbers in the Latest column in teal are frozen
-Version numbers in the <primary> Environment which are NOT frozen will be red.
+Version numbers in the <primary> Environment(s) which are NOT frozen will be red.
 
 
 Cookbooks                          Latest      Sandbox   Dev       IT        Staging   PRODUCTION
@@ -41,8 +41,6 @@ yum                                3.1.4       <= 3.1.4  <= 3.1.4  <= 3.1.4  <= 
 TO-DO
 =====
 1. List of Environments is currently hardcoded. Can pull from chef server easily, but need a way to estabilish sort order.
-2. Enable primary Environment to be set via knife.rb
-3. Allow multiple primaries
-4. Denote (perhaps with color) that a particular verison does not exist.
-4a. Denote (perhaps with color) constraints where no cookbook version exists to match the constraint.
-5. Show obsolete constraints (constraints for cookbook that do not exist at all)
+2. Enable primary Environment to be set via commandline or knife.rb
+3. Denote (perhaps with color) that a particular verison does not exist.
+3a. Denote (perhaps with color) constraints where no cookbook version exists to match the constraint.

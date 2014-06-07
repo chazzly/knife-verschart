@@ -14,14 +14,15 @@ module Verschart
 	#### Need to add variability - pull from envs.search (uncomment line 20).
 	#### --  Then how do I sort to my preference?
 	#### --  How do I designate a "PROD" which must be frozen?
-	primary = 'PRODUCTION'
+	primary = ['PRODUCTION']
 	srv = server_url.sub(%r{https://}, '').sub(/:[0-9]*$/, '')
+	ui.info('')
 	ui.info("Showing Versions for #{srv}")
 	ui.info('')
 	ui.info("Version numbers in the Latest column in \e[#{teal}mteal\e[0m are frozen")
-	ui.info("Version numbers in the #{primary} Environment which are NOT frozen will be \e[#{red}mred\e[0m.")
+	ui.info("Version numbers in the #{primary} Environments which are NOT frozen will be \e[#{red}mred\e[0m.")
 	ui.info('')
-	hdrs = %w(Cookbooks Latest Sandbox Dev Dev2 IT Staging PRODUCTION)
+	envs = %w(Sandbox Dev Dev2 IT Staging PRODUCTION)
 
 	# Build environment hash containing all constraints.
 	search_envs = Chef::Search::Query.new
@@ -29,7 +30,7 @@ module Verschart
 
 	charthash = {}
 	search_envs.search('environment', qury) do |enviro|
-	# hdrs << enviro.name
+	# envs << enviro.name
 	  charthash[enviro.name] = Hash.new
 	  if enviro.name.length > 8
 	    charthash[enviro.name]['col'] = enviro.name.length + 2
@@ -39,14 +40,16 @@ module Verschart
 	  enviro.cookbook_versions.each do | cb, v|
 	    charthash[enviro.name][cb] = Hash.new(0)
 	    charthash[enviro.name][cb]['vs'] = v.to_s
-	    if enviro.name == primary
+	    if primary.include?(enviro.name)
 	      fm = Chef::CookbookVersion.load(cb, version = "#{v.to_s.sub(/[<=> ]*/, '')}")
- 	      charthash[enviro.name][cb]['color'] = red if !fm.frozen_version?
+ 	     charthash[enviro.name][cb]['color'] = red unless fm.frozen_version?
 	    end
 	  end
 	end
 
-	# Set printf format string.  Add variability later (perhaps above when creating hdrs array.
+	hdrs = ['Cookbooks', 'Latest'].concat(envs)
+
+	# counter for longest cookbook name
 	cblen = 10
 
 	# Load list of latest cookbooks
@@ -63,10 +66,10 @@ module Verschart
 	  charthash['Cookbooks'][fm.metadata.name]['vs'] = fm.metadata.name
 	  charthash['Latest'][fm.metadata.name]['color'] = teal if fm.frozen_version?
 	  hdrs.each do |hdr|
-	   unless charthash[hdr].key?(fm.metadata.name)
-	     charthash[hdr][fm.metadata.name] = Hash.new(0)
-	     charthash[hdr][fm.metadata.name]['vs'] = 'X'
-	   end
+	    unless charthash[hdr].has_key?(fm.metadata.name)
+	      charthash[hdr][fm.metadata.name] = Hash.new(0)
+	      charthash[hdr][fm.metadata.name]['vs'] = 'X'
+	    end
 	  end
 	end
 
@@ -84,6 +87,27 @@ module Verschart
 	    end
 	  end
 	  printf "\n"
+	end
+
+	### Look for obsolete constraints
+	hd = 0 # Flag for section header
+	ev = 0 # Flag for Environent header
+
+	envs.each  do |env|
+	  charthash[env].keys.each do |ckbk|
+	    unless charthash['Cookbooks'].has_key?(ckbk)
+	      unless hd == 1
+	        ui.info('')
+	        ui.info('Obsolete Version constraints are listed below')
+		       hd = 1
+	      end
+	      unless ev == 1
+	        ui.info('')
+	        ui.info(env)
+	      end
+	      ui.info("-- #{ckbk}   #{charthash[env][ckbk]['vs']}")
+	    end
+	  end
 	end
     end
   end
