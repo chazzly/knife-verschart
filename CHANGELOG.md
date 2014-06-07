@@ -15,3 +15,7 @@ cruhl - Re-worked printf calculation to use colors rather than "-f" for frozen.
 -----
 cruhl - Allow multiple primaries
 	Show obsolete constraints
+
+2.2
+----
+cruhl - Primary environments can now by set by cli option or in knife.rb
