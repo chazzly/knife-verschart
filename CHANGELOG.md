@@ -1,5 +1,6 @@
 1.0
 -----
+
 cruhl - initial code
 
 1.1
@@ -18,4 +19,9 @@ cruhl - Allow multiple primaries
 
 2.2
 ----
-cruhl - Primary environments can now by set by cli option or in knife.rb
+cruhl - Primary environment(s) can now by set by cli option or in knife.rb
+
+2.3
+----
+cruhl - Environments are now pulled from Chef server, Order can be set by cli option or in knife.rb
+	Improved Comments & cleaned up a little.

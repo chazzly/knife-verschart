@@ -19,6 +19,8 @@ knife verschart [-e environment[,environment,...]]
     -e environment[,environment,...] A comma-separated list of environments to be considered primary. Versions which are NOT frozen willl be highlighted red.
     The primary environment(s) can also be set by using knife[:primary] setting in knife.rb
 
+    -o, --env_order env[,env,....]   A comma-separated list of environments to establish an display order. Any existing environments not included in this list will be added at the end
+
 
 Output will look something like this:
 
@@ -43,6 +45,5 @@ yum                                3.1.4       <= 3.1.4  <= 3.1.4  <= 3.1.4  <= 
 
 TO-DO
 =====
-1. List of Environments is currently hardcoded. Can pull from chef server easily, but need a way to estabilish sort order.
-3. Denote (perhaps with color) that a particular verison does not exist.
-3a. Denote (perhaps with color) constraints where no cookbook version exists to match the constraint.
+1. Denote (perhaps with color) that a particular verison does not exist.
+2. Denote (perhaps with color) constraints where no cookbook version exists to match the constraint.

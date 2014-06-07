@@ -1,43 +1,48 @@
-## Ver 2.2
+## Ver 2.3
 require 'chef/knife'
 require 'chef/search/query'
 
 module Verschart
   class Verschart < Chef::Knife
-    banner 'knife verschart [-e environment[,environment,...]]'
+    banner 'knife verschart [-e env[,env,...]] [[-o| --env_order] env[,env,...]]'
 
     option :primary,
-      :short => "-e environment[,environment,...]",
+      :short => "-e env[,env,...]",
       :description => "A comma-separated list of environments to be considered primary. Versions which are NOT frozen willl be highlighted red.",
       :proc => Proc.new { |primary| Chef::Config[:knife][:primary] = primary.split(',') }
+
+    option :order,
+      :short => "-o env[,env,....]",
+      :long => "--env_order env[,env,....]", 
+      :description => "A comma-separated list of environments to establish an display order. Any existing environments not included in this list will be added at the end",
+      :proc => Proc.new { |order| Chef::Config[:knife][:order] = order.split(',') }
 
     def run
 	red = 31
 	blue = 34
-	purple = 35
 	teal = 36
 
-	# set environment list
-	#### Need to add variability - pull from envs.search (uncomment line 20).
-	#### --  Then how do I sort to my preference?
-	#### --  How do I designate a "PROD" which must be frozen?
+	# Load Options
 	primary = config[:primary] || []
+	order = config[:order] || []
 	srv = server_url.sub(%r{https://}, '').sub(/:[0-9]*$/, '')
+
+	# Opening output
 	ui.info('')
 	ui.info("Showing Versions for #{srv}")
 	ui.info('')
 	ui.info("Version numbers in the Latest column in \e[#{teal}mteal\e[0m are frozen")
 	ui.info("Version numbers in the \e[#{blue}m#{primary}\e[0m Environment(s) which are NOT frozen will be \e[#{red}mred\e[0m.") unless primary.empty?
 	ui.info('')
-	envs = %w(Sandbox Dev Dev2 IT Staging PRODUCTION)
 
-	# Build environment hash containing all constraints.
+	# Build environment list and hash containing all constraints.
+	envis = []  # Placeholder for found environments
 	search_envs = Chef::Search::Query.new
 	qury = 'NOT name:_default'
 
-	charthash = {}
+	charthash = Hash.new  # The hash for all chart data
 	search_envs.search('environment', qury) do |enviro|
-	# envs << enviro.name
+	  envis << enviro.name 
 	  charthash[enviro.name] = Hash.new
 	  if enviro.name.length > 8
 	    charthash[enviro.name]['col'] = enviro.name.length + 2
@@ -54,12 +59,28 @@ module Verschart
 	  end
 	end
 
+	envs = [] # Final ordered list of Environments
+	unless order.empty?
+	  order.each do |env|
+	    if !envis.include?(env) 
+	      ui.fatal "#{env} is not a valid environment!"
+	      show_usage
+	      exit(1)
+	    end
+	    envs << env 
+	  end
+	end
+	envis.each do |env|
+	  envs << env unless envs.include?(env)
+	end
+	  
+	#  List of Chart headers
 	hdrs = ['Cookbooks', 'Latest'].concat(envs)
 
 	# counter for longest cookbook name
 	cblen = 10
 
-	# Load list of latest cookbooks
+	# Load list of latest cookbook versions
 	charthash['Latest'] = {}
 	charthash['Cookbooks'] = {}
 	charthash['Latest']['col'] = 12
@@ -80,8 +101,10 @@ module Verschart
 	  end
 	end
 
+	# Set first column width
 	charthash['Cookbooks']['col'] = cblen + 2
 
+	# Print the Chart headers
 	hdrs.each do | hdr |
 	  if !primary.empty? && primary.include?(hdr) 
 	    printf("\e[#{blue}m%-#{charthash[hdr]['col']}s\e[0m", hdr)
@@ -91,6 +114,7 @@ module Verschart
 	end
 	printf "\n"
 
+	# Print the Chart data
 	charthash['Cookbooks'].keys.each do | cbk |
 	  unless cbk == 'col'
 	    hdrs.each do | hdr |
@@ -100,7 +124,7 @@ module Verschart
 	  printf "\n"
 	end
 
-	### Look for obsolete constraints
+	# Look for obsolete constraints
 	hd = 0 # Flag for section header
 	ev = 0 # Flag for Environent header
 
@@ -110,7 +134,7 @@ module Verschart
 	      unless hd == 1
 	        ui.info('')
 	        ui.info('Obsolete Version constraints are listed below')
-		       hd = 1
+	        hd = 1
 	      end
 	      unless ev == 1
 	        ui.info('')
