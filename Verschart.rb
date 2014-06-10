@@ -11,20 +11,22 @@ module Verschart
       :description => "A comma-separated list of environments to be considered primary. Versions which are NOT frozen willl be highlighted red.",
       :proc => Proc.new { |primary| Chef::Config[:knife][:primary] = primary.split(',') }
 
-    option :order,
+    option :envorder,
       :short => "-o env[,env,....]",
       :long => "--env_order env[,env,....]", 
       :description => "A comma-separated list of environments to establish an display order. Any existing environments not included in this list will be added at the end",
-      :proc => Proc.new { |order| Chef::Config[:knife][:order] = order.split(',') }
+      :proc => Proc.new { |envorder| Chef::Config[:knife][:envorder] = envorder.split(',') }
 
     def run
 	red = 31
-	blue = 34
+	purple = 35
 	teal = 36
 
 	# Load Options
 	primary = config[:primary] || []
-	order = config[:order] || []
+	order = config[:envorder] || []
+	envorder = []
+	envorder = order.split(',') unless order.empty?
 	srv = server_url.sub(%r{https://}, '').sub(/:[0-9]*$/, '')
 
 	# Opening output
@@ -32,7 +34,8 @@ module Verschart
 	ui.info("Showing Versions for #{srv}")
 	ui.info('')
 	ui.info("Version numbers in the Latest column in \e[#{teal}mteal\e[0m are frozen")
-	ui.info("Version numbers in the \e[#{blue}m#{primary}\e[0m Environment(s) which are NOT frozen will be \e[#{red}mred\e[0m.") unless primary.empty?
+	ui.info("Version numbers in the \e[#{purple}m#{primary}\e[0m Environment(s) which are NOT frozen will be \e[#{red}mred\e[0m.") unless primary.empty?
+	ui.info("Requested order is #{envorder}") unless envorder.empty?
 	ui.info('')
 
 	# Build environment list and hash containing all constraints.
@@ -60,14 +63,13 @@ module Verschart
 	end
 
 	envs = [] # Final ordered list of Environments
-	unless order.empty?
-	  order.each do |env|
+	unless envorder.empty?
+	  envorder.each do |env|
 	    if !envis.include?(env) 
-	      ui.fatal "#{env} is not a valid environment!"
-	      show_usage
-	      exit(1)
+	      ui.warn "#{env} is not a valid environment!"
+	    else
+	      envs << env 
 	    end
-	    envs << env 
 	  end
 	end
 	envis.each do |env|
@@ -107,7 +109,7 @@ module Verschart
 	# Print the Chart headers
 	hdrs.each do | hdr |
 	  if !primary.empty? && primary.include?(hdr) 
-	    printf("\e[#{blue}m%-#{charthash[hdr]['col']}s\e[0m", hdr)
+	    printf("\e[#{purple}m%-#{charthash[hdr]['col']}s\e[0m", hdr)
 	  else
 	    printf("%-#{charthash[hdr]['col']}s", hdr)
 	  end
