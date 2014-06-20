@@ -12,7 +12,7 @@ Place the Verschart.rb file in your knife plugins directory.
 ex.
 `cp Verschart.rb ~/.chef/plugins/knife/Verschart.rb`
 
-One or more 'primary' environments can be set either on the command line or in knife.rb. These environments will highlight in red any versions which are NOT frozen.  
+One or more 'primary' environments can be set either on the command line or in knife.rb. These environments will show in red for any versions which are NOT frozen.  
 
 The list of environments is pulled from the Chef server (_default is ignored).  A prefered display order can be specified either on the command line or in knife.rb.
 
@@ -33,6 +33,8 @@ Showing Versions for chef01.example.com
 
 Version numbers in the Latest column in teal are frozen
 Version numbers in the PRODUCTION Environment(s) which are NOT frozen will be red.
+Version numbers which are different from the Latest, will be in blue
+Requested Environment order is ["Sandbox", "Dev", "Dev2", "IT", "Staging", "PRODUCTION"]
 
 
 Cookbooks                          Latest      Sandbox   Dev       IT        Staging   PRODUCTION

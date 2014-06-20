@@ -25,3 +25,8 @@ cruhl - Primary environment(s) can now by set by cli option or in knife.rb
 ----
 cruhl - Environments are now pulled from Chef server, Order can be set by cli option or in knife.rb
 	Improved Comments & cleaned up a little.
+
+2.4
+----
+cruhl - Added Highlight (bold w/ Blue background) for any version constraint that is different than the most recent.
+        This is intended to quickly show which environments are still "behind" during a roll-out.

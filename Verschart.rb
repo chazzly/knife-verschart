@@ -1,6 +1,13 @@
-## Ver 2.3
+## Ver 2.4
 require 'chef/knife'
 require 'chef/search/query'
+
+class String
+  def red;            "\033[31m#{self}\033[0m" end
+  def purple;            "\033[35m#{self}\033[0m" end
+  def teal;            "\033[36m#{self}\033[0m" end
+  def bold;          "\033[44m\033[1m#{self}\033[0m" end # Bold & blue back-ground
+end
 
 module Verschart
   class Verschart < Chef::Knife
@@ -18,10 +25,6 @@ module Verschart
       :proc => Proc.new { |envorder| Chef::Config[:knife][:envorder] = envorder.split(',') }
 
     def run
-	red = 31
-	purple = 35
-	teal = 36
-
 	# Load Options
 	primary = config[:primary] || []
 	order = config[:envorder] || []
@@ -33,9 +36,10 @@ module Verschart
 	ui.info('')
 	ui.info("Showing Versions for #{srv}")
 	ui.info('')
-	ui.info("Version numbers in the Latest column in \e[#{teal}mteal\e[0m are frozen")
-	ui.info("Version numbers in the \e[#{purple}m#{primary}\e[0m Environment(s) which are NOT frozen will be \e[#{red}mred\e[0m.") unless primary.empty?
-	ui.info("Requested order is #{envorder}") unless envorder.empty?
+	ui.info("Version numbers in the Latest column in " + "teal".teal + " are frozen")
+	ui.info("Version numbers in the " + "primary".purple + " Environment(s) which are NOT frozen will be " + "red".red ) unless primary.empty?
+	ui.info("Version numbers which are different from the Latest, will be in " + "blue".bold)
+	ui.info("Requested environment order is #{envorder}") unless envorder.empty?
 	ui.info('')
 
 	# Build environment list and hash containing all constraints.
@@ -43,23 +47,8 @@ module Verschart
 	search_envs = Chef::Search::Query.new
 	qury = 'NOT name:_default'
 
-	charthash = Hash.new  # The hash for all chart data
 	search_envs.search('environment', qury) do |enviro|
 	  envis << enviro.name 
-	  charthash[enviro.name] = Hash.new
-	  if enviro.name.length > 8
-	    charthash[enviro.name]['col'] = enviro.name.length + 2
-	  else
-	    charthash[enviro.name]['col'] = 10
-	  end
-	  enviro.cookbook_versions.each do | cb, v|
-	    charthash[enviro.name][cb] = Hash.new(0)
-	    charthash[enviro.name][cb]['vs'] = v.to_s
-	    if !primary.empty? && primary.include?(enviro.name)
-	      fm = Chef::CookbookVersion.load(cb, version = "#{v.to_s.sub(/[<=> ]*/, '')}")
- 	      charthash[enviro.name][cb]['color'] = red unless fm.frozen_version?
-	    end
-	  end
 	end
 
 	envs = [] # Final ordered list of Environments
@@ -82,9 +71,11 @@ module Verschart
 	# counter for longest cookbook name
 	cblen = 10
 
+	charthash = Hash.new  # The hash for all chart data
+
 	# Load list of latest cookbook versions
-	charthash['Latest'] = {}
-	charthash['Cookbooks'] = {}
+	charthash['Latest'] = Hash.new
+	charthash['Cookbooks'] = Hash.new
 	charthash['Latest']['col'] = 12
 	server_side_cookbooks = Chef::CookbookVersion.latest_cookbooks
 	server_side_cookbooks.each do |svcb|
@@ -94,35 +85,90 @@ module Verschart
 	  charthash['Cookbooks'][fm.metadata.name] = Hash.new(0)
 	  charthash['Latest'][fm.metadata.name]['vs'] = fm.metadata.version.to_s
 	  charthash['Cookbooks'][fm.metadata.name]['vs'] = fm.metadata.name
-	  charthash['Latest'][fm.metadata.name]['color'] = teal if fm.frozen_version?
-	  hdrs.each do |hdr|
-	    unless charthash[hdr].has_key?(fm.metadata.name)
-	      charthash[hdr][fm.metadata.name] = Hash.new(0)
-	      charthash[hdr][fm.metadata.name]['vs'] = 'X'
-	    end
+	  if fm.frozen_version?
+	    charthash['Latest'][fm.metadata.name]['teal'] = true
+	  else
+	    charthash['Latest'][fm.metadata.name]['teal'] = false
 	  end
+	  charthash['Latest'][fm.metadata.name]['bold'] = false
+	  charthash['Latest'][fm.metadata.name]['red'] = false
 	end
 
 	# Set first column width
 	charthash['Cookbooks']['col'] = cblen + 2
 
+	# Load vers constraints
+	search_envs.search('environment', qury) do |enviro|
+	  charthash[enviro.name] = Hash.new
+	  if enviro.name.length > 8
+	    charthash[enviro.name]['col'] = enviro.name.length + 2
+	  else
+	    charthash[enviro.name]['col'] = 10
+	  end
+	  enviro.cookbook_versions.each do | cb, v|
+	    charthash[enviro.name][cb] = Hash.new(0)
+	    charthash[enviro.name][cb]['vs'] = v.to_s
+	    vn = v.to_s.split(' ')[1]
+ 	    charthash[enviro.name][cb]['red'] = false
+ 	    charthash[enviro.name][cb]['teal'] = false
+	    if !primary.empty? && primary.include?(enviro.name)
+	      fm = Chef::CookbookVersion.load(cb, version = "#{vn}")
+ 	      charthash[enviro.name][cb]['red'] = true unless fm.frozen_version?
+	    end
+#	    ui.info("--#{vn}--#{charthash['Latest'][cb]['vs']}--")
+ 	    if vn != charthash['Latest'][cb]['vs']
+	      charthash[enviro.name][cb]['bold'] = true
+#	      ui.info("#{enviro.name} -- #{cb}\n")
+	    else
+	      charthash[enviro.name][cb]['bold'] = false
+	    end
+	  end
+	end
+
 	# Print the Chart headers
 	hdrs.each do | hdr |
 	  if !primary.empty? && primary.include?(hdr) 
-	    printf("\e[#{purple}m%-#{charthash[hdr]['col']}s\e[0m", hdr)
+	    print hdr.purple.ljust(charthash[hdr]['col'])
 	  else
-	    printf("%-#{charthash[hdr]['col']}s", hdr)
+	    print hdr.ljust(charthash[hdr]['col'])
 	  end
 	end
-	printf "\n"
+	print "\n"
 
 	# Print the Chart data
 	charthash['Cookbooks'].keys.each do | cbk |
 	  unless cbk == 'col'
 	    hdrs.each do | hdr |
-	      printf("\e[#{charthash[hdr][cbk]['color']}m%-#{charthash[hdr]['col']}s\e[0m", charthash[hdr][cbk]['vs'])
+	      case hdr
+	        when 'Cookbooks'
+	          print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])
+	        when 'Latest'
+	          if charthash[hdr][cbk]['teal']
+	            print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).teal
+	          else
+	            print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])
+	          end
+ 	        else
+	          if charthash[hdr].has_key?(cbk)
+		    if charthash[hdr][cbk]['bold'] 
+	 	      if charthash[hdr][cbk]['red']
+		        print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).red.bold
+		      else
+		        print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).bold
+		      end
+                    else
+	 	      if charthash[hdr][cbk]['red']
+		        print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).red
+		      else
+		        print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])
+		      end
+		    end
+	          else
+		    print "X".ljust(charthash[hdr]['col'])
+	          end
+		end
+	      end
 	    end
-	  end
 	  printf "\n"
 	end
 
