@@ -1,4 +1,4 @@
-## Ver 2.4
+## Ver 2.5
 require 'chef/knife'
 require 'chef/search/query'
 
@@ -111,16 +111,16 @@ module Verschart
 	    vn = v.to_s.split(' ')[1]
  	    charthash[enviro.name][cb]['red'] = false
  	    charthash[enviro.name][cb]['teal'] = false
-	    if !primary.empty? && primary.include?(enviro.name)
-	      fm = Chef::CookbookVersion.load(cb, version = "#{vn}")
- 	      charthash[enviro.name][cb]['red'] = true unless fm.frozen_version?
-	    end
-#	    ui.info("--#{vn}--#{charthash['Latest'][cb]['vs']}--")
- 	    if vn != charthash['Latest'][cb]['vs']
-	      charthash[enviro.name][cb]['bold'] = true
-#	      ui.info("#{enviro.name} -- #{cb}\n")
-	    else
-	      charthash[enviro.name][cb]['bold'] = false
+	    if charthash['Latest'].has_key?(cb)  
+   	      if !primary.empty? && primary.include?(enviro.name)
+	        fm = Chef::CookbookVersion.load(cb, version = "#{vn}")
+ 	        charthash[enviro.name][cb]['red'] = true unless fm.frozen_version?
+	      end
+ 	      if vn != charthash['Latest'][cb]['vs']
+	        charthash[enviro.name][cb]['bold'] = true
+	      else
+	        charthash[enviro.name][cb]['bold'] = false
+	      end
 	    end
 	  end
 	end
