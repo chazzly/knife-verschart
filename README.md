@@ -9,8 +9,7 @@ Installation and Config
 ============
 Place the Verschart.rb file in your knife plugins directory. 
 
-ex.
-`cp Verschart.rb ~/.chef/plugins/knife/Verschart.rb`
+ex. `cp Verschart.rb ~/.chef/plugins/knife/Verschart.rb`
 
 One or more 'primary' environments can be set either on the command line or in knife.rb. These environments will show in red for any versions which are NOT frozen.  
 
@@ -19,16 +18,19 @@ The list of environments is pulled from the Chef server (_default is ignored).  
 
 USE
 ===
+```sh
 knife verschart [-e environment[,environment,...]]
     -e environment[,environment,...] A comma-separated list of environments to be considered primary. Versions which are NOT frozen willl be highlighted red.
     	The primary environment(s) can also be set by using knife[:primary] setting in knife.rb
 
     -o, --env_order env[,env,....]   A comma-separated list of environments to establish an display order. Any existing environments not included in this list will be added at the end
-	The display order can also be set by using the knife[:envorder] setting in knife.rb 
+	The display order can also be set by using the knife[:envorder] setting in knife.rb
+```
 
 
 Output will look something like this:
 
+```sh
 Showing Versions for chef01.example.com
 
 Version numbers in the Latest column in teal are frozen
@@ -53,6 +55,7 @@ Obsolete Version constraints are listed below
 
 Sandbox
 -- apache   <= 3.2.1
+```
 
 TO-DO
 =====
