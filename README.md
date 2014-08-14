@@ -18,15 +18,22 @@ The list of environments is pulled from the Chef server (_default is ignored).  
 
 USE
 ===
+
+Command line:
+-------------
+
 ```sh
 knife verschart [-e environment[,environment,...]]
     -e environment[,environment,...] A comma-separated list of environments to be considered primary. Versions which are NOT frozen willl be highlighted red.
-    	The primary environment(s) can also be set by using knife[:primary] setting in knife.rb
-
     -o, --env_order env[,env,....]   A comma-separated list of environments to establish an display order. Any existing environments not included in this list will be added at the end
-	The display order can also be set by using the knife[:envorder] setting in knife.rb
 ```
 
+knife.rb:
+---------
+```sh
+knife[:primary] = "PRODUCTION"  - Sets the primary environment(s)
+knife[:envorder] = "Sandbox,Dev,Dev2,IT,Staging,PRODUCTION" - Sets the environment display order.
+```
 
 Output will look something like this:
 
