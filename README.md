@@ -7,10 +7,17 @@ Any obsolete version constraints (i.e. constraints for cookbooks which do not ex
 
 Installation and Config
 ============
+gem install knife-verschart
+
+Alternate install method:
+-------------------------
 Place the Verschart.rb file in your knife plugins directory. 
 
-ex. `cp Verschart.rb ~/.chef/plugins/knife/Verschart.rb`
+ex. `cp lib/chef/knife/Verschart.rb ~/.chef/plugins/knife/Verschart.rb`
 
+
+Config
+------
 One or more 'primary' environments can be set either on the command line or in knife.rb. These environments will show in red for any versions which are NOT frozen.  
 
 The list of environments is pulled from the Chef server (_default is ignored).  A prefered display order can be specified either on the command line or in knife.rb.

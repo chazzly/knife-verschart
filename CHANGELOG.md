@@ -1,6 +1,5 @@
 1.0
 -----
-
 cruhl - initial code
 
 1.1
@@ -30,3 +29,17 @@ cruhl - Environments are now pulled from Chef server, Order can be set by cli op
 ----
 cruhl - Added Highlight (bold w/ Blue background) for any version constraint that is different than the most recent.
         This is intended to quickly show which environments are still "behind" during a roll-out.
+
+2.5
+----
+cruhl - Updated README.md to markdown formatting.
+	Fixed error when constrained cookbook does not exist on server.
+	
+2.6
+----
+cruhl - First shot at making this into a Gem.
+
+2.7
+----
+cruhl - Made a gem that actually works.
+	Updated README accordingly.
