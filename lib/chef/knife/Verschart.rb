@@ -1,4 +1,4 @@
-## Ver 2.5
+## Ver 2.7.2
 require 'chef/knife'
 require 'chef/search/query'
 
@@ -77,9 +77,9 @@ module Verschart
 	charthash['Latest'] = Hash.new
 	charthash['Cookbooks'] = Hash.new
 	charthash['Latest']['col'] = 12
-	server_side_cookbooks = Chef::CookbookVersion.latest_cookbooks
+	server_side_cookbooks = Chef::CookbookVersion.list
 	server_side_cookbooks.each do |svcb|
-	  fm = Chef::CookbookVersion.load(svcb[0], version = '_latest')
+	  fm = Chef::CookbookVersion.load(svcb[0])
 	  cblen = fm.metadata.name.length if fm.metadata.name.length > cblen
 	  charthash['Latest'][fm.metadata.name] = Hash.new(0)
 	  charthash['Cookbooks'][fm.metadata.name] = Hash.new(0)
