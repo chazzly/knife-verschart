@@ -77,3 +77,4 @@ TO-DO
 2. Denote (perhaps with color) constraints where no cookbook version exists to match the constraint.
 3. Sort cookbook list - this broke when switching away from the cookbook_latest call.
 4. bombs, if version of constraint doesn't exist on server 
+5. ability to limit cookbooks some how
