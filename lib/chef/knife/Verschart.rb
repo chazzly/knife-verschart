@@ -11,7 +11,7 @@ end
 
 module Verschart
   class Verschart < Chef::Knife
-    banner 'knife verschart [-e env[,env,...]] [[-o| --env_order] env[,env,...]]'
+    banner 'knife verschart [-e env[,env,...]] [[-o| --env_order] env[,env,...]] [[-c | --cookbooks] cookbook[,cookbook,...]]'
 
     option :primary,
       :short => "-e env[,env,...]",
@@ -21,8 +21,14 @@ module Verschart
     option :envorder,
       :short => "-o env[,env,....]",
       :long => "--env_order env[,env,....]", 
-      :description => "A comma-separated list of environments to establish an display order. Any existing environments not included in this list will be added at the end",
+      :description => "A comma-separated list of environments to establish a display order. Any existing environments not included in this list will be added at the end",
       :proc => Proc.new { |envorder| Chef::Config[:knife][:envorder] = envorder.split(',') }
+
+    option :cbselect,
+      :short => "-c cookbook[,cookbook,....]",
+      :description => "A comma-separated list of cookbooks to include in the chart",
+      :long => "--cookbooks cookbook[,cookbook,...]",
+      :proc => Proc.new { |cbselect|  Chef::Config[:knife][:cbselect] = cbselect.split(',') }
 
     def run
 	# Load Options
@@ -31,6 +37,7 @@ module Verschart
 	envorder = []
 	envorder = order.split(',') unless order.empty?
 	srv = server_url.sub(%r{https://}, '').sub(/:[0-9]*$/, '')
+        cbselect = config[:cbselect] || []
 
 	# Opening output
 	ui.info('')
@@ -79,19 +86,21 @@ module Verschart
 	charthash['Latest']['col'] = 12
 	server_side_cookbooks = Chef::CookbookVersion.list
 	server_side_cookbooks.each do |svcb|
-	  fm = Chef::CookbookVersion.load(svcb[0])
-	  cblen = fm.metadata.name.length if fm.metadata.name.length > cblen
-	  charthash['Latest'][fm.metadata.name] = Hash.new(0)
-	  charthash['Cookbooks'][fm.metadata.name] = Hash.new(0)
-	  charthash['Latest'][fm.metadata.name]['vs'] = fm.metadata.version.to_s
-	  charthash['Cookbooks'][fm.metadata.name]['vs'] = fm.metadata.name
-	  if fm.frozen_version?
-	    charthash['Latest'][fm.metadata.name]['teal'] = true
-	  else
-	    charthash['Latest'][fm.metadata.name]['teal'] = false
-	  end
-	  charthash['Latest'][fm.metadata.name]['bold'] = false
-	  charthash['Latest'][fm.metadata.name]['red'] = false
+   	  if !cbselect.empty? && cbselect.include?(svcb[0])
+	    fm = Chef::CookbookVersion.load(svcb[0])
+	    cblen = fm.metadata.name.length if fm.metadata.name.length > cblen
+  	    charthash['Latest'][fm.metadata.name] = Hash.new(0)
+	    charthash['Cookbooks'][fm.metadata.name] = Hash.new(0)
+	    charthash['Latest'][fm.metadata.name]['vs'] = fm.metadata.version.to_s
+	    charthash['Cookbooks'][fm.metadata.name]['vs'] = fm.metadata.name
+	    if fm.frozen_version?
+	      charthash['Latest'][fm.metadata.name]['teal'] = true
+	    else
+	      charthash['Latest'][fm.metadata.name]['teal'] = false
+	    end
+	    charthash['Latest'][fm.metadata.name]['bold'] = false
+	    charthash['Latest'][fm.metadata.name]['red'] = false
+          end
 	end
 
 	# Set first column width
