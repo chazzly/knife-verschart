@@ -1,4 +1,4 @@
-## Ver 2.7.2
+## Ver 2.7.3
 require 'chef/knife'
 require 'chef/search/query'
 
@@ -136,7 +136,7 @@ module Verschart
 	print "\n"
 
 	# Print the Chart data
-	charthash['Cookbooks'].keys.each do | cbk |
+	charthash['Cookbooks'].keys.sort.each do | cbk |
 	  unless cbk == 'col'
 	    hdrs.each do | hdr |
 	      case hdr
@@ -168,8 +168,8 @@ module Verschart
 	          end
 		end
 	      end
-	    end
-	  printf "\n"
+	    printf "\n"
+	  end
 	end
 
 	# Look for obsolete constraints

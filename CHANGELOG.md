@@ -43,3 +43,11 @@ cruhl - First shot at making this into a Gem.
 ----
 cruhl - Made a gem that actually works.
 	Updated README accordingly.
+
+2.7.2
+-----
+cruhl - Changed updated to use Chef::CookbookVersion#list, rather than  #latest_cookbooks.
+
+2.7.3
+-----
+cruhl - re-sorted cookbooks, which changed with 2.7.2
