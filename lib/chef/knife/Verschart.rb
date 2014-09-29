@@ -11,10 +11,10 @@ end
 
 module Verschart
   class Verschart < Chef::Knife
-    banner 'knife verschart [-e env[,env,...]] [[-o| --env_order] env[,env,...]] [[-c | --cookbooks] cookbook[,cookbook,...]]'
+    banner 'knife verschart [--primary env[,env,...]] [[-o| --env_order] env[,env,...]] [[--cbselect] cookbook[,cookbook,...]]'
 
     option :primary,
-      :short => "-e env[,env,...]",
+      :long => "--primary env[,env,...]",
       :description => "A comma-separated list of environments to be considered primary. Versions which are NOT frozen willl be highlighted red.",
       :proc => Proc.new { |primary| Chef::Config[:knife][:primary] = primary.split(',') }
 
@@ -25,9 +25,8 @@ module Verschart
       :proc => Proc.new { |envorder| Chef::Config[:knife][:envorder] = envorder.split(',') }
 
     option :cbselect,
-      :short => "-c cookbook[,cookbook,....]",
+      :long => "--cbselect cookbook[,cookbook,....]",
       :description => "A comma-separated list of cookbooks to include in the chart",
-      :long => "--cookbooks cookbook[,cookbook,...]",
       :proc => Proc.new { |cbselect|  Chef::Config[:knife][:cbselect] = cbselect.split(',') }
 
     def run
@@ -86,7 +85,7 @@ module Verschart
 	charthash['Latest']['col'] = 12
 	server_side_cookbooks = Chef::CookbookVersion.list
 	server_side_cookbooks.each do |svcb|
-   	  if !cbselect.empty? && cbselect.include?(svcb[0])
+   	  if cbselect.empty? || (!cbselect.empty? && cbselect.include?(svcb[0]))
 	    fm = Chef::CookbookVersion.load(svcb[0])
 	    cblen = fm.metadata.name.length if fm.metadata.name.length > cblen
   	    charthash['Latest'][fm.metadata.name] = Hash.new(0)
@@ -181,23 +180,25 @@ module Verschart
 	  end
 	end
 
-	# Look for obsolete constraints
-	hd = 0 # Flag for section header
-	ev = 0 # Flag for Environent header
+	if cbselect.empty?
+	  # Look for obsolete constraints
+	  hd = 0 # Flag for section header
+	  ev = 0 # Flag for Environent header
 
-	envs.each  do |env|
-	  charthash[env].keys.each do |ckbk|
-	    unless charthash['Cookbooks'].has_key?(ckbk)
-	      unless hd == 1
-	        ui.info('')
-	        ui.info('Obsolete Version constraints are listed below')
-	        hd = 1
+	  envs.each  do |env|
+	    charthash[env].keys.each do |ckbk|
+	      unless charthash['Cookbooks'].has_key?(ckbk)
+	        unless hd == 1
+	          ui.info('')
+	          ui.info('Obsolete Version constraints are listed below')
+	          hd = 1
+	        end
+	        unless ev == 1
+	          ui.info('')
+	          ui.info(env)
+	        end
+	        ui.info("-- #{ckbk}   #{charthash[env][ckbk]['vs']}")
 	      end
-	      unless ev == 1
-	        ui.info('')
-	        ui.info(env)
-	      end
-	      ui.info("-- #{ckbk}   #{charthash[env][ckbk]['vs']}")
 	    end
 	  end
 	end
