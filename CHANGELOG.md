@@ -51,3 +51,8 @@ cruhl - Changed updated to use Chef::CookbookVersion#list, rather than  #latest_
 2.7.3
 -----
 cruhl - re-sorted cookbooks, which changed with 2.7.2
+
+2.7.4
+-----
+cruhl - Added option to select specific cookbooks
+      - Changed options to avoid conflict with knife options

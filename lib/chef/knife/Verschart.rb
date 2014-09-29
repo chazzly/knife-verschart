@@ -83,9 +83,14 @@ module Verschart
 	charthash['Latest'] = Hash.new
 	charthash['Cookbooks'] = Hash.new
 	charthash['Latest']['col'] = 12
+	r = Regexp.union(cbselect)
 	server_side_cookbooks = Chef::CookbookVersion.list
 	server_side_cookbooks.each do |svcb|
-   	  if cbselect.empty? || (!cbselect.empty? && cbselect.include?(svcb[0]))
+          select_match = false
+	  if !cbselect.empty? && r =~ svcb[0] 
+	    select_match = true
+	  end
+   	  if cbselect.empty? || select_match
 	    fm = Chef::CookbookVersion.load(svcb[0])
 	    cblen = fm.metadata.name.length if fm.metadata.name.length > cblen
   	    charthash['Latest'][fm.metadata.name] = Hash.new(0)

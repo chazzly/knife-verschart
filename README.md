@@ -30,9 +30,10 @@ Command line:
 -------------
 
 ```sh
-knife verschart [-e environment[,environment,...]]
-    -e environment[,environment,...] A comma-separated list of environments to be considered primary. Versions which are NOT frozen willl be highlighted red.
+knife verschart [--primary environment[,environment,...]]
+    --primary environment[,environment,...] A comma-separated list of environments to be considered primary. Versions which are NOT frozen willl be highlighted red.
     -o, --env_order env[,env,....]   A comma-separated list of environments to establish an display order. Any existing environments not included in this list will be added at the end
+    --cbselect cookbook[,cookbook,....]   A comma-separated list of cookbooks to list.  Each entry in the list is treated as a regex when comparing the cookbook name.
 ```
 
 knife.rb:
