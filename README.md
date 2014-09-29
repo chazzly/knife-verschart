@@ -77,7 +77,3 @@ TO-DO
 1. Denote (perhaps with color) that a particular verison does not exist.
 2. Denote (perhaps with color) constraints where no cookbook version exists to match the constraint.
 3. Bombs, if version of constraint doesn't exist on server  (can't re-create now)
-4. Ability to limit cookbooks some how
-   a. Useing list
-   b. Using re
-
