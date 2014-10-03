@@ -3,10 +3,11 @@ require 'chef/knife'
 require 'chef/search/query'
 
 class String
-  def red;            "\033[31m#{self}\033[0m" end
-  def purple;            "\033[35m#{self}\033[0m" end
-  def teal;            "\033[36m#{self}\033[0m" end
-  def bold;          "\033[44m\033[1m#{self}\033[0m" end # Bold & blue back-ground
+  def red; "\033[31m\033[1m#{self}\033[0m" end
+  def purple; "\033[35m#{self}\033[0m" end
+  def teal; "\033[36m#{self}\033[0m" end
+  def bold; "\033[44m\033[1m#{self}\033[0m" end # Bold & blue back-ground
+  def yellow; "\033[30m\033[43m#{self}\033[0m" end
 end
 
 module Verschart
@@ -44,7 +45,8 @@ module Verschart
 	ui.info('')
 	ui.info("Version numbers in the Latest column in " + "teal".teal + " are frozen")
 	ui.info("Version numbers in the " + "primary".purple + " Environment(s) which are NOT frozen will be " + "red".red ) unless primary.empty?
-	ui.info("Version numbers which are different from the Latest, will be in " + "blue".bold)
+	ui.info("Version numbers which do not exist on the server will be in " + "yellow".yellow)
+	ui.info("Version numbers which are different from the Latest (but do exist), will be in " + "blue".bold)
 	ui.info("Requested environment order is #{envorder}") unless envorder.empty?
 	ui.info('')
 
@@ -78,6 +80,8 @@ module Verschart
 	cblen = 10
 
 	charthash = Hash.new  # The hash for all chart data
+	# store list of availible cookbook versions for comparison to constraint
+        vers_store = Chef::CookbookVersion.list_all_versions
 
 	# Load list of latest cookbook versions
 	charthash['Latest'] = Hash.new
@@ -119,17 +123,23 @@ module Verschart
 	    charthash[enviro.name]['col'] = 10
 	  end
 	  enviro.cookbook_versions.each do | cb, v|
-	    charthash[enviro.name][cb] = Hash.new(0)
-	    charthash[enviro.name][cb]['vs'] = v.to_s
-	    vn = v.to_s.split(' ')[1]
- 	    charthash[enviro.name][cb]['red'] = false
- 	    charthash[enviro.name][cb]['teal'] = false
 	    if charthash['Latest'].has_key?(cb)  
-   	      if !primary.empty? && primary.include?(enviro.name)
+	      charthash[enviro.name][cb] = Hash.new(0)
+  	      charthash[enviro.name][cb]['vs'] = v.to_s
+ 	      vn = v.to_s.split(' ')[1]
+ 	      charthash[enviro.name][cb]['red'] = false
+ 	      charthash[enviro.name][cb]['teal'] = false
+ 	      charthash[enviro.name][cb]['yellow'] = true
+	      vers_store[cb]['versions'].each do | vss |
+	        if vss['version'] == vn
+		  charthash[enviro.name][cb]['yellow'] = false
+	        end
+	      end
+   	      if !primary.empty? && primary.include?(enviro.name) && !charthash[enviro.name][cb]['yellow']
 	        fm = Chef::CookbookVersion.load(cb, version = "#{vn}")
  	        charthash[enviro.name][cb]['red'] = true unless fm.frozen_version?
 	      end
- 	      if vn != charthash['Latest'][cb]['vs']
+ 	      if vn != charthash['Latest'][cb]['vs'] &&  !charthash['Latest'][cb]['yellow']
 	        charthash[enviro.name][cb]['bold'] = true
 	      else
 	        charthash[enviro.name][cb]['bold'] = false
@@ -166,12 +176,16 @@ module Verschart
 		    if charthash[hdr][cbk]['bold'] 
 	 	      if charthash[hdr][cbk]['red']
 		        print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).red.bold
+		      elsif charthash[hdr][cbk]['yellow']
+		        print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).yellow.bold
 		      else
 		        print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).bold
 		      end
                     else
 	 	      if charthash[hdr][cbk]['red']
 		        print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).red
+		      elsif charthash[hdr][cbk]['yellow']
+		        print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).yellow
 		      else
 		        print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])
 		      end

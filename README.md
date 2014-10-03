@@ -50,7 +50,8 @@ Showing Versions for chef01.example.com
 
 Version numbers in the Latest column in teal are frozen
 Version numbers in the PRODUCTION Environment(s) which are NOT frozen will be red.
-Version numbers which are different from the Latest, will be in blue
+Version numbers which do not exist on the server will be in yellow
+Version numbers which are different from the Latest (but do exist), will be in blue
 Requested Environment order is ["Sandbox", "Dev", "Dev2", "IT", "Staging", "PRODUCTION"]
 
 
@@ -74,6 +75,4 @@ Sandbox
 
 TO-DO
 =====
-1. Denote (perhaps with color) that a particular verison does not exist.
-2. Denote (perhaps with color) constraints where no cookbook version exists to match the constraint.
-3. Bombs, if version of constraint doesn't exist on server  (can't re-create now)
+1. Denote (perhaps with color) constraints where no cookbook version exists to match the constraint.

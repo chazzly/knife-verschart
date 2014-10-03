@@ -56,3 +56,7 @@ cruhl - re-sorted cookbooks, which changed with 2.7.2
 -----
 cruhl - Added option to select specific cookbooks
       - Changed options to avoid conflict with knife options
+
+2.7.5
+-----
+cruhl - Added yellow highlight to denote cookbook versions which do not exist on the chef server
