@@ -130,6 +130,7 @@ module Verschart
  	      charthash[enviro.name][cb]['red'] = false
  	      charthash[enviro.name][cb]['teal'] = false
  	      charthash[enviro.name][cb]['yellow'] = true
+ 	      charthash[enviro.name][cb]['bold'] = false
 	      vers_store[cb]['versions'].each do | vss |
 	        if vss['version'] == vn
 		  charthash[enviro.name][cb]['yellow'] = false
@@ -139,10 +140,8 @@ module Verschart
 	        fm = Chef::CookbookVersion.load(cb, version = "#{vn}")
  	        charthash[enviro.name][cb]['red'] = true unless fm.frozen_version?
 	      end
- 	      if vn != charthash['Latest'][cb]['vs'] &&  !charthash['Latest'][cb]['yellow']
+ 	      if vn != charthash['Latest'][cb]['vs'] &&  !charthash[enviro.name][cb]['yellow']
 	        charthash[enviro.name][cb]['bold'] = true
-	      else
-	        charthash[enviro.name][cb]['bold'] = false
 	      end
 	    end
 	  end
