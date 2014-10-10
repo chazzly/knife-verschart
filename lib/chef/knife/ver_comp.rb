@@ -1,23 +1,12 @@
 def ver_str_valid(vers)
   prts = vers.split('.')  
-
-  ### Validate
-  if prts.length < 1
-    print 'Insufficient Version parts'
-    return false
-  end
+  return [false] if prts.length < 1
   
-  #### Need a way to confirm they are all didgits - this didn't work
   prts.each do |pt|
-    if !/^[0-9]+$/.match(pt)
-      print "Invalid ${pt} - All version Parts must numberic"
-      return false
-    end
+    return [false] if !/^[0-9]+$/.match(pt)
   end 
 
-  until prts.length == 3
-    prts << '0'
-  end
+  prts << '0' until prts.length == 3
 
   return [true,prts]
 end
@@ -26,25 +15,20 @@ def const_valid(v_const)
   valid_ops = ['=','>=', '<=', '<', '>', '~>' ]
   ### maybe a better way to do this - look for first digit, and split from there if needed.
   c_op, c_vers = v_const.split(' ')
-  #print c_op
-  #print c_vers
   check = ver_str_valid(c_vers)
   if check[0] && valid_ops.include?(c_op)
-    return [ true, c_op, check[1]]
+    return [ true, c_op, check[1] ]
   else
-    return false
+    return [false]
   end
 end
 
 def pess_const(v_const)
   c_op, c_vers = v_const.split(' ')
   prts = c_vers.split('.')  
-  case prts.length
-  when 3
-    return [ prts[0], (prts[1].to_i + 1).to_s ,'0']
-  when 2
-  return [ (prts[0].to_i + 1).to_s ,'0','0']
-  end
+
+  return [ prts[0], (prts[1].to_i + 1).to_s ,'0'] if prts.length == 3
+  return [ (prts[0].to_i + 1).to_s ,'0','0'] if prts.length == 2
 end
   
  
@@ -52,10 +36,7 @@ def ver_satisfies?(c_op, c_vers, v_vers)
   satisfy = false
   case c_op
   when '='
-    if c_vers == v_vers
-      satisfy = true
-    end
-  when '~>'
+    satisfy = true  if c_vers == v_vers
   when '>','<'
     (0..2).each do |x| 
       tst = v_vers[x] + c_op + c_vers[x]

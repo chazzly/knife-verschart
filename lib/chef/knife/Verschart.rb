@@ -1,13 +1,16 @@
 ## Ver 2.7.3
 require 'chef/knife'
 require 'chef/search/query'
+require 'ver_comp'
 
 class String
   def red; "\033[31m\033[1m#{self}\033[0m" end
+  def green; "\033[32m\033[1m#{self}\033[0m" end
   def purple; "\033[35m#{self}\033[0m" end
-  def teal; "\033[36m#{self}\033[0m" end
-  def bold; "\033[44m\033[1m#{self}\033[0m" end # Bold & blue back-ground
-  def yellow; "\033[30m\033[43m#{self}\033[0m" end
+  def teal; "\033[36m\033[1m#{self}\033[0m" end
+  def hblue; "\033[44m\033[1m#{self}\033[0m" end # Bold & blue back-ground
+  def hyellow; "\033[30m\033[43m#{self}\033[0m" end
+  def hred; "\033[1m\033[41m#{self}\033[0m" end
 end
 
 module Verschart
@@ -44,6 +47,7 @@ module Verschart
 	ui.info("Showing Versions for #{srv}")
 	ui.info('')
 	ui.info("Version numbers in the Latest column in " + "teal".teal + " are frozen")
+	ui.info("Version constraints which cannot be met by the existing versions on the server will be highlighted in " "red".hred )
 	ui.info("Version numbers in the " + "primary".purple + " Environment(s) which are NOT frozen will be " + "red".red ) unless primary.empty?
 	ui.info("Version numbers which do not exist on the server will be in " + "yellow".yellow)
 	ui.info("Version numbers which are different from the Latest (but do exist), will be in " + "blue".bold)
@@ -130,10 +134,14 @@ module Verschart
  	      charthash[enviro.name][cb]['red'] = false
  	      charthash[enviro.name][cb]['teal'] = false
  	      charthash[enviro.name][cb]['yellow'] = true
+ 	      charthash[enviro.name][cb]['somthing'] = true
  	      charthash[enviro.name][cb]['bold'] = false
 	      vers_store[cb]['versions'].each do | vss |
 	        if vss['version'] == vn
 		  charthash[enviro.name][cb]['yellow'] = false
+	        end
+	        if const_check(v, vss['version'])
+		  charthash[enviro.name][cb]['something'] = false
 	        end
 	      end
    	      if !primary.empty? && primary.include?(enviro.name) && !charthash[enviro.name][cb]['yellow']
