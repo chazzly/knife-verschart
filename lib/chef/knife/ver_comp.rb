@@ -2,53 +2,53 @@ def ver_str_valid(vers)
   prts = vers.split('.')  
 
   ### Validate
-  if prts.length < 2
-    print "Insufficient Version parts"
-    return 1
+  if prts.length < 1
+    print 'Insufficient Version parts'
+    return false
   end
   
   #### Need a way to confirm they are all didgits - this didn't work
   prts.each do |pt|
-    begin
-      x = pt.to_i
-    rescue
-      print "Invalid ${pt} - Version Parts must numberic"
-      return 2
+    if !/^[0-9]+$/.match(pt)
+      print "Invalid ${pt} - All version Parts must numberic"
+      return false
     end
   end 
 
-  if prts.length == 2
+  until prts.length == 3
     prts << '0'
   end
-  
-  return prts
+
+  return [true,prts]
 end
 
 def const_valid(v_const)
+  valid_ops = ['=','>=', '<=', '<', '>', '~>' ]
   ### maybe a better way to do this - look for first digit, and split from there if needed.
-  c_op, t_vers = v_const.split(' ')
-  print c_op
-  print t_vers
-  c_vers = ver_str_check(t_vers)  
-  print c_op
-  print c_vers
+  c_op, c_vers = v_const.split(' ')
+  #print c_op
+  #print c_vers
+  check = ver_str_valid(c_vers)
+  if check[0] && valid_ops.include?(c_op)
+    return [ true, c_op, check[1]]
+  else
+    return false
+  end
 end
 
 def ver_satisfies?(c_op, c_vers, v_vers)
   satisfy = false
-  (0..2).each do |x| 
-    if c_op == "="
-      if c_vers == v_vers
-        satisfy = true
-      end
-    else
+  case c_op
+  when '='
+    if c_vers == v_vers
+      satisfy = true
+    end
+  when '~>'
+  when '>','<'
+    (0..2).each do |x| 
       tst = v_vers[x] + c_op + c_vers[x]
       if eval(tst)
         satisfy = true
-        break
-      elsif v_vers[x] == c_vers[x]
-        satisfy = true
-      else
         break
       end
     end
@@ -56,8 +56,12 @@ def ver_satisfies?(c_op, c_vers, v_vers)
   return satisfy
 end 
 
-
-
-     
-
-
+def const_check(const, vers_to_check)
+  c_check = const_valid(const)
+  v_check = ver_str_valid(vers_to_check)
+  if !c_check || !v_check
+    return false
+  end
+  
+  return ver_satisfies?(c_check[1], c_check[2], v_check[1])
+end
