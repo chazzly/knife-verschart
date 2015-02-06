@@ -30,10 +30,11 @@ Command line:
 -------------
 
 ```sh
-knife verschart [--primary environment[,environment,...]]
+knife verschart [--primary environment[,environment,...]][--html]
     --primary environment[,environment,...] A comma-separated list of environments to be considered primary. Versions which are NOT frozen willl be highlighted red.
     -o, --env_order env[,env,....]   A comma-separated list of environments to establish an display order. Any existing environments not included in this list will be added at the end
     --cbselect cookbook[,cookbook,....]   A comma-separated list of cookbooks to list.  Each entry in the list is treated as a regex when comparing the cookbook name.
+    --html  Out put formatted as an html table.
 ```
 
 knife.rb:
@@ -41,6 +42,7 @@ knife.rb:
 ```sh
 knife[:primary] = "PRODUCTION"  - Sets the primary environment(s)
 knife[:envorder] = "Sandbox,Dev,Dev2,IT,Staging,PRODUCTION" - Sets the environment display order.
+knife[:html] = true
 ```
 
 Output will look something like this:

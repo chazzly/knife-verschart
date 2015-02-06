@@ -60,3 +60,7 @@ cruhl - Added option to select specific cookbooks
 2.7.5
 -----
 cruhl - Added yellow highlight to denote cookbook versions which do not exist on the chef server
+
+2.8.0
+-----
+cruhl - Added basics for output in html
