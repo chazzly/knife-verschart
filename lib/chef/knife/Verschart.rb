@@ -161,7 +161,7 @@ module Verschart
         print("<tr>")
         hdrs.each do | hdr |
           if !primary.empty? && primary.include?(hdr) 
-            print "<td><strong>#{hdr.purple.ljust(charthash[hdr]['col'])}</strong></td>\n"
+            print "<td style='color:purple'><strong>#{hdr.ljust(charthash[hdr]['col'])}</strong></td>\n"
           else
             print "<td><strong>#{hdr.ljust(charthash[hdr]['col'])}</strong></td>\n"
           end
@@ -178,7 +178,7 @@ module Verschart
                 print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
               when 'Latest'
                 if charthash[hdr][cbk]['teal']
-                  print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).teal}</td>\n"
+                  print "<td style='color:teal'>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
                 else
                   print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
                 end
@@ -186,17 +186,17 @@ module Verschart
                 if charthash[hdr].has_key?(cbk)
                   if charthash[hdr][cbk]['bold'] 
                     if charthash[hdr][cbk]['red']
-                      print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).red.bold}</td>\n"
+                      print "<td style='color:red'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
                     elsif charthash[hdr][cbk]['yellow']
-                      print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).yellow.bold}</td>\n"
+                      print "<td style='color:yellow'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
                     else
-                      print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).bold}</td>\n"
+                      print "<td><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
                     end
                   else
                     if charthash[hdr][cbk]['red']
-                      print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).red}</td>\n"
+                      print "<td style='color:red'>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
                     elsif charthash[hdr][cbk]['yellow']
-                      print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).yellow}</td>\n"
+                      print "<td style='color:yellow'>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
                     else
                       print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
                     end
