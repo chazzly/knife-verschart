@@ -64,3 +64,7 @@ cruhl - Added yellow highlight to denote cookbook versions which do not exist on
 2.8.0
 -----
 cruhl - Added basics for output in html
+
+2.8.1
+-----
+cruhl - finalized html output, updated README.md

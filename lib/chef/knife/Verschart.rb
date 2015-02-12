@@ -46,15 +46,28 @@ module Verschart
       html = config[:html] || false
 
       # Opening output
-      ui.info('')
-      ui.info("Showing Versions for #{srv}")
-      ui.info('')
-      ui.info("Version numbers in the Latest column in " + "teal".teal + " are frozen")
-      ui.info("Version numbers in the " + "primary".purple + " Environment(s) which are NOT frozen will be " + "red".red ) unless primary.empty?
-      ui.info("Version numbers which do not exist on the server will be in " + "yellow".yellow)
-      ui.info("Version numbers which are different from the Latest (but do exist), will be in " + "blue".bold)
-      ui.info("Requested environment order is #{envorder}") unless envorder.empty?
-      ui.info('')
+      if html
+        ui.info('<!DOCTYPE html>')
+        ui.info('<html>')
+        ui.info('<body>')
+        ui.info('<p>Showing Versions for cs1chl001.classifiedventures.com')
+        ui.info('</BR>')
+        ui.info("Version numbers in the Latest column in <span style='color:blue'> blue</span> are frozen</BR>")
+        ui.info("Version numbers in the <span style='color:purple'><strong>primary</strong></span> Environment(s) which are NOT frozen will be <span style='background:yellow;color:red'>red</span></BR>")
+        ui.info("Version numbers which do not exist on the server will be in <span style='color:green'><strong>green</strong></span></BR>")
+        ui.info("Version numbers which are different from the Latest (but do exist), will be in <span style='background:blue;color:white'>white</span></BR>")
+        ui.info("Requested environment order is #{envorder}</BR>") unless envorder.empty?
+        ui.info('')
+      else
+        ui.info("Showing Versions for #{srv}")
+        ui.info('')
+        ui.info("Version numbers in the Latest column in " + "teal".teal + " are frozen")
+        ui.info("Version numbers in the " + "primary".purple + " Environment(s) which are NOT frozen will be " + "red".red ) unless primary.empty?
+        ui.info("Version numbers which do not exist on the server will be in " + "yellow".yellow)
+        ui.info("Version numbers which are different from the Latest (but do exist), will be in " + "blue".bold)
+        ui.info("Requested environment order is #{envorder}") unless envorder.empty?
+        ui.info('')
+      end
 
       # Build environment list and hash containing all constraints.
       envis = []  # Placeholder for found environments
@@ -153,10 +166,9 @@ module Verschart
         end
       end
 
-
       if html
         ### html format here!
-        print "<table style='width:100%'>"
+        print "<table border='1' style='width:75%;border-collapse:collapse;font-size:14px'>"
         print("</tr>")
         print("<tr>")
         hdrs.each do | hdr |
@@ -178,7 +190,7 @@ module Verschart
                 print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
               when 'Latest'
                 if charthash[hdr][cbk]['teal']
-                  print "<td style='color:teal'>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
+                  print "<td style='color:blue'>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
                 else
                   print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
                 end
@@ -186,17 +198,17 @@ module Verschart
                 if charthash[hdr].has_key?(cbk)
                   if charthash[hdr][cbk]['bold'] 
                     if charthash[hdr][cbk]['red']
-                      print "<td style='color:red'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
+                      print "<td style='background:yellow;color:red'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
                     elsif charthash[hdr][cbk]['yellow']
-                      print "<td style='color:yellow'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
+                      print "<td style='background:blue;color:green'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
                     else
-                      print "<td><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
+                      print "<td style='background:blue;color:white'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
                     end
                   else
                     if charthash[hdr][cbk]['red']
-                      print "<td style='color:red'>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
+                      print "<td style='background:yello;color:red'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
                     elsif charthash[hdr][cbk]['yellow']
-                      print "<td style='color:yellow'>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
+                      print "<td style='color:green'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
                     else
                       print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
                     end
@@ -209,6 +221,9 @@ module Verschart
             printf "</tr>\n"
           end
         end
+        print "</table>\n"
+        print "</body>\n"
+        print "</html>\n"
       else
         ####  Old print format
         # Print the Chart headers
