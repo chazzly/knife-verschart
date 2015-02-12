@@ -42,15 +42,15 @@ knife[:envorder] = "Sandbox,Dev,IT,Staging,PRODUCTION" ## Sets the environment d
 knife[:html] = true  ## Output will be formatted for html
 ```
 
-Output will look something like this:
+Output will look something like this (only with color):
 
 ```sh
 Showing Versions for chef01.example.com
 
 Version numbers in the Latest column in teal are frozen
 Version numbers in the PRODUCTION Environment(s) which are NOT frozen will be red.
-Version numbers which do not exist on the server will be in yellow
-Version numbers which are different from the Latest (but do exist), will be in [44m[1mblue[0m
+Version numbers which do not exist on the server will be in yellow.
+Version numbers which are different from the Latest (but do exist), will be in blue.
 Requested Environment order is ["Sandbox", "Dev", "Dev2", "IT", "Staging", "PRODUCTION"]
 
 
@@ -71,7 +71,3 @@ Obsolete Version constraints are listed below
 Sandbox
 -- apache   <= 3.2.1
 ```
-
-TO-DO
-=====
-1. Denote (perhaps with color) constraints where no cookbook version exists to match the constraint.
