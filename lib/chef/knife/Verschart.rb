@@ -53,9 +53,9 @@ module Verschart
         ui.info('<p>Showing Versions for cs1chl001.classifiedventures.com')
         ui.info('</BR>')
         ui.info("Version numbers in the Latest column in <span style='color:blue'> blue</span> are frozen</BR>")
-        ui.info("Version numbers in the <span style='color:purple'><strong>primary</strong></span> Environment(s) which are NOT frozen will be <span style='background:yellow;color:red'>red</span></BR>")
-        ui.info("Version numbers which do not exist on the server will be in <span style='color:green'><strong>green</strong></span></BR>")
-        ui.info("Version numbers which are different from the Latest (but do exist), will be in <span style='background:blue;color:white'>white</span></BR>")
+        ui.info("Version numbers in the <span style='color:purple'><strong><u>primary</u></strong></span> Environment(s) which are NOT frozen will be <span style='background:yellow;color:red'>red</span></BR>")
+        ui.info("Version numbers which do not exist on the server will be in <span style='background:green;color:white'>green</span> highlight</BR>")
+        ui.info("Version numbers which are different from the Latest (but do exist), will be in <span style='background:blue;color:white'>blue</span> highlight</BR>")
         ui.info("Requested environment order is #{envorder}</BR>") unless envorder.empty?
         ui.info('')
       else
@@ -173,7 +173,7 @@ module Verschart
         print("<tr>")
         hdrs.each do | hdr |
           if !primary.empty? && primary.include?(hdr) 
-            print "<td style='color:purple'><strong>#{hdr.ljust(charthash[hdr]['col'])}</strong></td>\n"
+            print "<td style='color:purple'><strong><u>#{hdr.ljust(charthash[hdr]['col'])}</u></strong></td>\n"
           else
             print "<td><strong>#{hdr.ljust(charthash[hdr]['col'])}</strong></td>\n"
           end
@@ -206,9 +206,9 @@ module Verschart
                     end
                   else
                     if charthash[hdr][cbk]['red']
-                      print "<td style='background:yello;color:red'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
+                      print "<td style='background:yellow;color:red'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
                     elsif charthash[hdr][cbk]['yellow']
-                      print "<td style='color:green'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
+                      print "<td style='color:white;background:green'>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
                     else
                       print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
                     end

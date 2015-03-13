@@ -1,7 +1,7 @@
 Gem::Specification.new do |gem|
   gem.name	= 'knife-verschart'
-  gem.version	= '2.8.1'
-  gem.date	= '2015-02-12'
+  gem.version	= '2.8.2'
+  gem.date	= '2015-03-13'
   gem.summary	= "Plug-in for Chef::Knife to print a chart of all cookbooks and the version constraints contained in each environment. See README.md for more details"
   gem.authors	= ["Chaz Ruhl"]
   gem.email	= 'chazzly@gmail.com'

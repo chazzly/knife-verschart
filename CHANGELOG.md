@@ -68,3 +68,7 @@ cruhl - Added basics for output in html
 2.8.1
 -----
 cruhl - finalized html output, updated README.md
+
+2.8.2
+-----
+cruhl - Adjusted colors for clarity
