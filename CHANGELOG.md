@@ -72,3 +72,7 @@ cruhl - finalized html output, updated README.md
 2.8.2
 -----
 cruhl - Adjusted colors for clarity
+
+2.8.3
+-----
+cruhl - Corrected hardcoded server name on html output.

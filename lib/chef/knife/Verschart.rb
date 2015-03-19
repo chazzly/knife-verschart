@@ -50,7 +50,7 @@ module Verschart
         ui.info('<!DOCTYPE html>')
         ui.info('<html>')
         ui.info('<body>')
-        ui.info('<p>Showing Versions for cs1chl001.classifiedventures.com')
+        ui.info("<p>Showing Versions for #{srv}")
         ui.info('</BR>')
         ui.info("Version numbers in the Latest column in <span style='color:blue'> blue</span> are frozen</BR>")
         ui.info("Version numbers in the <span style='color:purple'><strong><u>primary</u></strong></span> Environment(s) which are NOT frozen will be <span style='background:yellow;color:red'>red</span></BR>")
