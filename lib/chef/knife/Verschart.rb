@@ -41,11 +41,10 @@ module Verschart
       order = config[:envorder] || []
       envorder = []
       unless order.empty?
-        case order.class      
-        when 'String'
-          envorder = order.split(',') unless order.empty?
-        when 'Array'
-          order.each { |env| envorder << env } unless order.empty? 
+        if order.is_a?(String)
+          envorder = order.split(',')
+        elsif order.is_a?(Array)
+          order.each { |env| envorder << env }
         end
       end
       srv = server_url.sub(%r{https://}, '').sub(/:[0-9]*$/, '')
@@ -64,6 +63,7 @@ module Verschart
         ui.info("Version numbers which do not exist on the server will be in <span style='background:green;color:white'>green</span> highlight</BR>")
         ui.info("Version numbers which are different from the Latest (but do exist), will be in <span style='background:blue;color:white'>blue</span> highlight</BR>")
         ui.info("Requested environment order is #{envorder}</BR>") unless envorder.empty?
+        ui.info("No Requested environment order</BR>") if envorder.empty?
         ui.info('')
       else
         ui.info("Showing Versions for #{srv}")
@@ -73,6 +73,7 @@ module Verschart
         ui.info("Version numbers which do not exist on the server will be in " + "yellow".yellow)
         ui.info("Version numbers which are different from the Latest (but do exist), will be in " + "blue".bold)
         ui.info("Requested environment order is #{envorder}") unless envorder.empty?
+        ui.info("No Requested environment order") if envorder.empty?
         ui.info('')
       end
 

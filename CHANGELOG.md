@@ -81,3 +81,11 @@ cruhl - Corrected hardcoded server name on html output.
 -----
 nshemonsky - fix populating of envorder array
 cruhl - allow envorder to be either string or array
+
+2.8.6
+-----
+cruhl - Fixed incorrect envorder test.
+B
+A
+D
+cruhl - corrected envorder test
