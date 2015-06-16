@@ -40,7 +40,14 @@ module Verschart
       primary = config[:primary] || []
       order = config[:envorder] || []
       envorder = []
-      order.each { |env| envorder << env } unless order.empty? 
+      unless order.empty?
+        case order.class      
+        when 'String'
+          envorder = order.split(',') unless order.empty?
+        when 'Array'
+          order.each { |env| envorder << env } unless order.empty? 
+        end
+      end
       srv = server_url.sub(%r{https://}, '').sub(/:[0-9]*$/, '')
       cbselect = config[:cbselect] || []
       html = config[:html] || false

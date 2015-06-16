@@ -76,3 +76,8 @@ cruhl - Adjusted colors for clarity
 2.8.3
 -----
 cruhl - Corrected hardcoded server name on html output.
+
+2.8.4
+-----
+nshemonsky - fix populating of envorder array
+cruhl - allow envorder to be either string or array
