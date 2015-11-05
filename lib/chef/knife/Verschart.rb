@@ -1,13 +1,29 @@
-## Ver 2.7.3
+require 'net/http'
+require 'date'
 require 'chef/knife'
 require 'chef/search/query'
 
 class String
-  def red; "\033[31m\033[1m#{self}\033[0m" end
-  def purple; "\033[35m#{self}\033[0m" end
-  def teal; "\033[36m#{self}\033[0m" end
-  def bold; "\033[44m\033[1m#{self}\033[0m" end # Bold & blue back-ground
-  def yellow; "\033[30m\033[43m#{self}\033[0m" end
+  def red
+    "\033[31m\033[1m#{self}\033[0m"
+  end
+
+  def purple
+    "\033[35m#{self}\033[0m"
+  end
+
+  def teal
+    "\033[36m#{self}\033[0m"
+  end
+
+  # Bold & blue back-ground
+  def bold
+    "\033[44m\033[1m#{self}\033[0m"
+  end
+
+  def yellow
+    "\033[30m\033[43m#{self}\033[0m"
+  end
 end
 
 module Verschart
@@ -15,25 +31,30 @@ module Verschart
     banner 'knife verschart [--primary env[,env,...]] [[-o| --env_order] env[,env,...]] [[--cbselect] cookbook[,cookbook,...]]'
 
     option :primary,
-      :long => "--primary env[,env,...]",
-      :description => "A comma-separated list of environments to be considered primary. Versions which are NOT frozen willl be highlighted red.",
-      :proc => Proc.new { |primary| Chef::Config[:knife][:primary] = primary.split(',') }
+           long: '--primary env[,env,...]',
+           description: 'A comma-separated list of environments to be considered primary. Versions which are NOT frozen willl be highlighted red.',
+           proc: proc { |primary| Chef::Config[:knife][:primary] = primary.split(',') }
 
     option :html,
-      :long => "--html",
-      :description => "Output in basic html fomat.",
-      :proc => Proc.new { |html| Chef::Config[:knife][:html] = true }
+           long: '--html',
+           description: 'Output in basic html fomat.',
+           proc: proc { |_html| Chef::Config[:knife][:html] = true }
 
     option :envorder,
-      :short => "-o env[,env,....]",
-      :long => "--env_order env[,env,....]", 
-      :description => "A comma-separated list of environments to establish a display order. Any existing environments not included in this list will be added at the end",
-      :proc => Proc.new { |envorder| Chef::Config[:knife][:envorder] = envorder.split(',') }
+           short: '-o env[,env,....]',
+           long: '--env_order env[,env,....]',
+           description: 'A comma-separated list of environments to establish a display order. Any existing environments not included in this list will be added at the end',
+           proc: proc { |envorder| Chef::Config[:knife][:envorder] = envorder.split(',') }
 
     option :cbselect,
-      :long => "--cbselect cookbook[,cookbook,....]",
-      :description => "A comma-separated list of cookbooks to include in the chart",
-      :proc => Proc.new { |cbselect|  Chef::Config[:knife][:cbselect] = cbselect.split(',') }
+           long: '--cbselect cookbook[,cookbook,....]',
+           description: 'A comma-separated list of cookbooks to include in the chart',
+           proc: proc { |cbselect|  Chef::Config[:knife][:cbselect] = cbselect.split(',') }
+
+    option :statuspage,
+           long: '--statuspage',
+           description: 'Special option to support Cars.com status page',
+           proc: proc { |_statuspage|  Chef::Config[:knife][:statuspage] = true }
 
     def run
       # Load Options
@@ -50,6 +71,7 @@ module Verschart
       srv = server_url.sub(%r{https://}, '').sub(/:[0-9]*$/, '')
       cbselect = config[:cbselect] || []
       html = config[:html] || false
+      stats = config[:statuspage] || false
 
       # Opening output
       if html
@@ -63,17 +85,17 @@ module Verschart
         ui.info("Version numbers which do not exist on the server will be in <span style='background:green;color:white'>green</span> highlight</BR>")
         ui.info("Version numbers which are different from the Latest (but do exist), will be in <span style='background:blue;color:white'>blue</span> highlight</BR>")
         ui.info("Requested environment order is #{envorder}</BR>") unless envorder.empty?
-        ui.info("No Requested environment order</BR>") if envorder.empty?
+        ui.info('No Requested environment order</BR>') if envorder.empty?
         ui.info('')
-      else
+      elsif stats == false
         ui.info("Showing Versions for #{srv}")
         ui.info('')
-        ui.info("Version numbers in the Latest column in " + "teal".teal + " are frozen")
-        ui.info("Version numbers in the " + "primary".purple + " Environment(s) which are NOT frozen will be " + "red".red ) unless primary.empty?
-        ui.info("Version numbers which do not exist on the server will be in " + "yellow".yellow)
-        ui.info("Version numbers which are different from the Latest (but do exist), will be in " + "blue".bold)
+        ui.info('Version numbers in the Latest column in ' + 'teal'.teal + ' are frozen')
+        ui.info('Version numbers in the ' + 'primary'.purple + ' Environment(s) which are NOT frozen will be ' + 'red'.red) unless primary.empty?
+        ui.info('Version numbers which do not exist on the server will be in ' + 'yellow'.yellow)
+        ui.info('Version numbers which are different from the Latest (but do exist), will be in ' + 'blue'.bold)
         ui.info("Requested environment order is #{envorder}") unless envorder.empty?
-        ui.info("No Requested environment order") if envorder.empty?
+        ui.info('No Requested environment order') if envorder.empty?
         ui.info('')
       end
 
@@ -83,44 +105,42 @@ module Verschart
       qury = 'NOT name:_default'
 
       search_envs.search('environment', qury) do |enviro|
-        envis << enviro.name 
+        envis << enviro.name
       end
 
       envs = [] # Final ordered list of Environments
       unless envorder.empty?
         envorder.each do |env|
-          if !envis.include?(env) 
+          if !envis.include?(env)
             ui.warn "#{env} is not a valid environment!"
           else
-            envs << env 
+            envs << env
           end
         end
       end
       envis.each do |env|
         envs << env unless envs.include?(env)
       end
-        
+
       #  List of Chart headers
-      hdrs = ['Cookbooks', 'Latest'].concat(envs)
+      hdrs = %w(Cookbooks Latest).concat(envs)
 
       # counter for longest cookbook name
       cblen = 10
 
-      charthash = Hash.new  # The hash for all chart data
+      charthash = {}  # The hash for all chart data
       # store list of availible cookbook versions for comparison to constraint
       vers_store = Chef::CookbookVersion.list_all_versions
 
       # Load list of latest cookbook versions
-      charthash['Latest'] = Hash.new
-      charthash['Cookbooks'] = Hash.new
+      charthash['Latest'] = {}
+      charthash['Cookbooks'] = {}
       charthash['Latest']['col'] = 12
       r = Regexp.union(cbselect)
       server_side_cookbooks = Chef::CookbookVersion.list
       server_side_cookbooks.each do |svcb|
         select_match = false
-        if !cbselect.empty? && r =~ svcb[0] 
-          select_match = true
-        end
+        select_match = true if !cbselect.empty? && r =~ svcb[0]
         if cbselect.empty? || select_match
           fm = Chef::CookbookVersion.load(svcb[0])
           cblen = fm.metadata.name.length if fm.metadata.name.length > cblen
@@ -143,14 +163,14 @@ module Verschart
 
       # Load vers constraints
       search_envs.search('environment', qury) do |enviro|
-        charthash[enviro.name] = Hash.new
+        charthash[enviro.name] = {}
         if enviro.name.length > 8
           charthash[enviro.name]['col'] = enviro.name.length + 2
         else
           charthash[enviro.name]['col'] = 10
         end
-        enviro.cookbook_versions.each do | cb, v|
-          if charthash['Latest'].has_key?(cb)  
+        enviro.cookbook_versions.each do |cb, v|
+          if charthash['Latest'].key?(cb)
             charthash[enviro.name][cb] = Hash.new(0)
             charthash[enviro.name][cb]['vs'] = v.to_s
             vn = v.to_s.split(' ')[1]
@@ -158,7 +178,7 @@ module Verschart
             charthash[enviro.name][cb]['teal'] = false
             charthash[enviro.name][cb]['yellow'] = true
             charthash[enviro.name][cb]['bold'] = false
-            vers_store[cb]['versions'].each do | vss |
+            vers_store[cb]['versions'].each do |vss|
               if vss['version'] == vn
                 charthash[enviro.name][cb]['yellow'] = false
               end
@@ -167,7 +187,7 @@ module Verschart
               fm = Chef::CookbookVersion.load(cb, version = "#{vn}")
               charthash[enviro.name][cb]['red'] = true unless fm.frozen_version?
             end
-            if vn != charthash['Latest'][cb]['vs'] &&  !charthash[enviro.name][cb]['yellow']
+            if vn != charthash['Latest'][cb]['vs'] && !charthash[enviro.name][cb]['yellow']
               charthash[enviro.name][cb]['bold'] = true
             end
           end
@@ -177,10 +197,10 @@ module Verschart
       if html
         ### html format here!
         print "<table border='1' style='width:75%;border-collapse:collapse;font-size:14px'>"
-        print("</tr>")
-        print("<tr>")
-        hdrs.each do | hdr |
-          if !primary.empty? && primary.include?(hdr) 
+        print('</tr>')
+        print('<tr>')
+        hdrs.each do |hdr|
+          if !primary.empty? && primary.include?(hdr)
             print "<td style='color:purple'><strong><u>#{hdr.ljust(charthash[hdr]['col'])}</u></strong></td>\n"
           else
             print "<td><strong>#{hdr.ljust(charthash[hdr]['col'])}</strong></td>\n"
@@ -189,10 +209,10 @@ module Verschart
         print("</tr>\n")
 
         # Print the Chart data
-        charthash['Cookbooks'].keys.sort.each do | cbk |
-          print("<tr>")
+        charthash['Cookbooks'].keys.sort.each do |cbk|
+          print('<tr>')
           unless cbk == 'col'
-            hdrs.each do | hdr |
+            hdrs.each do |hdr|
               case hdr
               when 'Cookbooks'
                 print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
@@ -203,8 +223,8 @@ module Verschart
                   print "<td>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</td>\n"
                 end
               else
-                if charthash[hdr].has_key?(cbk)
-                  if charthash[hdr][cbk]['bold'] 
+                if charthash[hdr].key?(cbk)
+                  if charthash[hdr][cbk]['bold']
                     if charthash[hdr][cbk]['red']
                       print "<td style='background:yellow;color:red'><strong>#{charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])}</strong></td>\n"
                     elsif charthash[hdr][cbk]['yellow']
@@ -222,7 +242,7 @@ module Verschart
                     end
                   end
                 else
-                  print "<td>X</td>".ljust(charthash[hdr]['col'])
+                  print '<td>X</td>'.ljust(charthash[hdr]['col'])
                 end
               end
             end
@@ -232,11 +252,40 @@ module Verschart
         print "</table>\n"
         print "</body>\n"
         print "</html>\n"
+      elsif stats
+        ## Required url "http://cj9utl200.cars.com:8080/update/Chef/<cookbook Name>/<env>/<vers string>/_/<date string>"
+        base_url = 'http://cj9utl200.cars.com:8080/update/Chef/'
+        stats_envs = %w(Sandbox Dev FT IT Staging DR1 DR2 PRODUCTION)
+        d = DateTime.now
+        datestr = d.strftime('%Y-%m-%d_%k:%M')
+        charthash['Cookbooks'].keys.each do |cb|
+          stats_envs.each do |env|
+            next if cb == 'col' 
+            if charthash[env].key?(cb) and charthash[env][cb].key?('vs')
+	      cb_ver = charthash[env][cb]['vs'].match(/\d+\.\d+\.\d+/)
+              env = 'Stage' if env=='Staging'
+              env = 'Prod' if env == 'PRODUCTION'
+              out_url = "#{base_url}#{cb}/#{env}/#{cb_ver}/_/#{datestr}"
+              uri = URI(out_url)
+              req = Net::HTTP::Post.new(uri)
+              res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+                http.request(req)
+              end
+
+              case res.value
+              when 200
+                # OK
+              else
+                puts res.value
+              end
+            end
+          end
+        end
       else
         ####  Old print format
         # Print the Chart headers
-        hdrs.each do | hdr |
-          if !primary.empty? && primary.include?(hdr) 
+        hdrs.each do |hdr|
+          if !primary.empty? && primary.include?(hdr)
             print hdr.purple.ljust(charthash[hdr]['col'])
           else
             print hdr.ljust(charthash[hdr]['col'])
@@ -244,11 +293,10 @@ module Verschart
         end
         print "\n"
 
-
         # Print the Chart data
-        charthash['Cookbooks'].keys.sort.each do | cbk |
+        charthash['Cookbooks'].keys.sort.each do |cbk|
           unless cbk == 'col'
-            hdrs.each do | hdr |
+            hdrs.each do |hdr|
               case hdr
               when 'Cookbooks'
                 print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])
@@ -259,8 +307,8 @@ module Verschart
                   print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col'])
                 end
               else
-                if charthash[hdr].has_key?(cbk)
-                  if charthash[hdr][cbk]['bold'] 
+                if charthash[hdr].key?(cbk)
+                  if charthash[hdr][cbk]['bold']
                     if charthash[hdr][cbk]['red']
                       print charthash[hdr][cbk]['vs'].ljust(charthash[hdr]['col']).red.bold
                     elsif charthash[hdr][cbk]['yellow']
@@ -278,7 +326,7 @@ module Verschart
                     end
                   end
                 else
-                  print "X".ljust(charthash[hdr]['col'])
+                  print 'X'.ljust(charthash[hdr]['col'])
                 end
               end
             end
@@ -293,7 +341,7 @@ module Verschart
 
           envs.each  do |env|
             charthash[env].keys.each do |ckbk|
-              unless charthash['Cookbooks'].has_key?(ckbk)
+              unless charthash['Cookbooks'].key?(ckbk)
                 unless hd == 1
                   ui.info('')
                   ui.info('Obsolete Version constraints are listed below')

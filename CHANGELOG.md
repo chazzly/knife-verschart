@@ -85,7 +85,7 @@ cruhl - allow envorder to be either string or array
 2.8.6
 -----
 cruhl - Fixed incorrect envorder test.
-B
-A
-D
-cruhl - corrected envorder test
+
+2.8.7
+-----
+cruhl - adding cars.com specific feature to populate cars.com internal status page. 
