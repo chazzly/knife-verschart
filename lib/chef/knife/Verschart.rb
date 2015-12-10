@@ -253,9 +253,9 @@ module Verschart
         print "</body>\n"
         print "</html>\n"
       elsif stats
-        ## Required url "http://cj9utl200.cars.com:8080/update/Chef/<cookbook Name>/<env>/<vers string>/_/<date string>"
-        base_url = 'http://cj9utl200.cars.com:8080/update/Chef/'
-        stats_envs = %w(Sandbox Dev FT IT Staging DR1 DR2 PRODUCTION)
+        ## Required url "http://cj1utl002.cars.com:8080/update/Chef/<cookbook Name>?env=<env>&vers=<ver string>&date=<date string>"
+        base_url = 'http://cj1utl002.cars.com:8080/update/Chef/'
+        stats_envs = %w(Latest Sandbox Dev FT IT Staging DR1 DR2 PRODUCTION)
         d = DateTime.now
         datestr = d.strftime('%Y-%m-%d_%k:%M')
         charthash['Cookbooks'].keys.each do |cb|
@@ -265,7 +265,7 @@ module Verschart
 	      cb_ver = charthash[env][cb]['vs'].match(/\d+\.\d+\.\d+/)
               env = 'Stage' if env=='Staging'
               env = 'Prod' if env == 'PRODUCTION'
-              out_url = "#{base_url}#{cb}/#{env}/#{cb_ver}/_/#{datestr}"
+              out_url = "#{base_url}#{cb}?env=#{env}&vers=#{cb_ver}&date=#{datestr}"
               uri = URI(out_url)
               req = Net::HTTP::Post.new(uri)
               res = Net::HTTP.start(uri.hostname, uri.port) do |http|
